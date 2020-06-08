@@ -107,7 +107,7 @@ public:
         }
     }
 
-    virtual void eval() {
+    inline virtual void eval() {
         DUT->eval();
     }
 
@@ -140,11 +140,11 @@ public:
 
 #endif
 
-    unsigned long tickcount() {
+    inline unsigned long tickcount() {
         return d_tickcount;
     }
 
-    std::string name() {
+    inline std::string name() {
         return d_testname;
     }
 };
@@ -157,8 +157,8 @@ private:
     const std::string d_vcdname;
     TPRINTER *d_printer;
 
-    template<class VALUE, class ...Args>
-    void TASSERT_(VALUE actual, VALUE expected, const char *message_format, Args &... args) {
+    template<bool VALUE_FORMAT_ENABLED = false, class VALUE, class ...Args>
+    void TASSERT_(const char *value_f, VALUE actual, VALUE expected, const char *message_f, Args &... args) {
         if (!(actual == expected)) {
 //            [ FAIL ]  expected: XXX   actual: XXX
 //
@@ -167,21 +167,25 @@ private:
             d_printer->TPRINTF("[ FAIL ]  ");
 
             if constexpr(0 != sizeof...(args)) {
-                printf(message_format, args...);
+                printf(message_f, args...);
                 printf("\n");
                 d_printer->increaseIndent();
                 d_printer->printIndent();
                 d_printer->decreaseIndent();
             }
 
-            printExpectedActual(actual, expected);
+            if constexpr(VALUE_FORMAT_ENABLED)
+                printExpectedActual<true>(value_f, actual, expected);
+            else
+                printExpectedActual<false>("", actual, expected);
+
             this->stop_trace();
         } else {
             if constexpr(0 == sizeof...(args))
                 d_printer->TPRINTF("[  OK  ]\n");
             else {
                 char info_format[100];
-                sprintf(info_format, "[  OK  ]  %s\n", message_format);
+                sprintf(info_format, "[  OK  ]  %s\n", message_f);
                 d_printer->TPRINTF(info_format, args...);
             }
         }
@@ -190,28 +194,57 @@ private:
 #endif
     }
 
-    template<class VALUE>
-    inline void printExpectedActual(VALUE actual, VALUE expected) {
-        std::cout << "expected: " << std::setiosflags(std::ios::left) << std::setw(10)
-                  << expected << "actual: " << actual << std::endl;
-        std::flush(std::cout);
+    template<bool VALUE_FORMAT_ENABLED = false, class VALUE>
+    inline void printExpectedActual(const char *value_f, VALUE actual, VALUE expected) {
+        if constexpr(VALUE_FORMAT_ENABLED) {
+            const char *message_ff = value_f;
+            if (strncmp(value_f, "%", 1) == 0) // if starts with %
+                message_ff = value_f + 1; // substring
+            char *format;
+            sprintf(format,
+                    "expected: %%%s actual: %%%s\n", message_ff, message_ff); // e.g. expected: %10d actual: %10d
+
+            printf(format, actual, expected);
+        } else
+            std::cout << "expected: " << std::setiosflags(std::ios::left) << std::setw(10)
+                      << expected << "actual: " << actual << std::endl;
     }
 
 protected:
     const std::vector<TESTCASE> d_testcases;
 public:
     template<class VALUE, class ...Args>
-    inline void TASSERT_INFO(VALUE actual, VALUE expected, const char *message_format, Args &... args) {
-        this->TASSERT_(actual, expected, message_format, args...);
+    inline void TASSERT_INFO(VALUE actual, VALUE expected, const char *message_f, Args &... args) {
+        TASSERT_<false>("", actual, expected, message_f, args...);
+    }
+
+    template<class VALUE, class ...Args>
+    inline void
+    TASSERTF_INFO(const char *value_f, VALUE actual, VALUE expected, const char *message_f, Args &... args) {
+        TASSERT_<true>(value_f, actual, expected, message_f, args...);
     }
 
     template<class VALUE>
-    inline void TASSERT(VALUE actual, VALUE expected) { this->TASSERT_(actual, expected, ""); }
+    inline void TASSERT(VALUE actual, VALUE expected) {
+        this->TASSERT_<false>("", actual, expected, "");
+    }
+
+    template<class VALUE>
+    inline void TASSERTF(const char *value_f, VALUE actual, VALUE expected) {
+        this->TASSERT_<true>(value_f, actual, expected, "");
+    }
 
     template<class VALUE>
     inline void TASSERTI(VALUE actual, VALUE expected) {
         d_printer->increaseIndent();
         TASSERT(actual, expected);
+        d_printer->decreaseIndent();
+    }
+
+    template<class VALUE>
+    inline void TASSERTIF(const char *value_f, VALUE actual, VALUE expected) {
+        d_printer->increaseIndent();
+        TASSERTF(value_f, actual, expected);
         d_printer->decreaseIndent();
     }
 

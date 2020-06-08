@@ -46,11 +46,19 @@ public:
 //        t->TPRINTF("[%-8s] cmd=%-5d reset=%-5d load_pc=%-5lu -> %-5lu (expected: %-5lu)\n",
 //                   testcase.name, testcase.cmd, testcase.reset, testcase.load_pc, DUT->pc, testcase.expected_pc);
 //        this->TASSERTI(DUT->pc, testcase.expected_pc);
+//
+//
+//        v1.1: There're some new assert & print methods added, they are all suffixed with letter F, e.g. TASSERTF_INFO,
+//              TASSERTIF, these new added methods allow users to pass a additional prefixed parameter value_format to
+//              control the format of the expected-actual pair that printed on the screen.
+//
+//              this->TASSERTF("%-5d", DUT->pc, testcase.expected_pc);
 
-        this->TASSERT_INFO(DUT->pc, testcase.expected_pc,
-                           "[%-8s] cmd=%-5d reset=%-5d load_pc=%-5lu -> %-5lu (expected: %-5lu)",
-                           testcase.name, testcase.cmd, testcase.reset,
-                           testcase.load_pc, DUT->pc, testcase.expected_pc);
+        this->TASSERTF_INFO("%-5d",
+                            DUT->pc, testcase.expected_pc,
+                            "[%-8s] cmd=%-5d reset=%-5d load_pc=%-5lu -> %-5lu (expected: %-5lu)",
+                            testcase.name, testcase.cmd, testcase.reset,
+                            testcase.load_pc, DUT->pc, testcase.expected_pc);
     }
 };
 
