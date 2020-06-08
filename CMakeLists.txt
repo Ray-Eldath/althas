@@ -22,6 +22,7 @@ option(${PROJECT_NAME}_BUILD_EXAMPLE "Build example for ${PROJECT_NAME}." OFF)
 
 if (${PROJECT_NAME}_BUILD_EXAMPLE)
     add_subdirectory(example/pc)
+    add_subdirectory(example/termcolor)
 endif ()
 
 #

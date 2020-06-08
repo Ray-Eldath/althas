@@ -9,7 +9,8 @@ endif ()
 set(verilator_INCLUDE_DIR ${VERILATOR_ROOT}/include)
 
 add_executable(sim_pc sim_pc.cpp)
-target_include_directories(sim_pc PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+target_include_directories(sim_pc
+        PRIVATE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>)
 
 verilate(sim_pc

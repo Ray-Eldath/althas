@@ -1,6 +1,8 @@
 #ifndef ALTHAS_HPP
 #define ALTHAS_HPP
 
+#include "termcolor.hpp"
+
 // include config macros
 #ifndef ALTHAS_CONFIG_H
 
@@ -164,7 +166,12 @@ private:
 //
 //            [ FAIL ]  [none    ] cmd=0     reset=0     load_pc=0     -> 1     (expected: 1    )
 //                expected: XXX   actual: XXX
-            d_printer->TPRINTF("[ FAIL ]  ");
+
+            d_printer->TPRINTF(colorize("[ FAIL ]", ForegroundColor::BLACK, BackgroundColor::RED, Effect::BOLD));
+            resetColor();
+            printf("  ");
+
+            setColor(ForegroundColor::RED);
 
             if constexpr(0 != sizeof...(args)) {
                 printf(message_f, args...);
@@ -179,13 +186,16 @@ private:
             else
                 printExpectedActual<false>("", actual, expected);
 
+            resetColor();
+#ifdef FAIL_ASSERTION
             this->stop_trace();
+#endif
         } else {
-            if constexpr(0 == sizeof...(args))
-                d_printer->TPRINTF("[  OK  ]\n");
-            else {
-                char info_format[100];
-                sprintf(info_format, "[  OK  ]  %s\n", message_f);
+            if constexpr(0 == sizeof...(args)) {
+                d_printer->TPRINTF(colorize("[  OK  ]", ForegroundColor::GREEN));
+            } else {
+                char info_format[150];
+                sprintf(info_format, "%s[  OK  ]%s  %s\n", color(ForegroundColor::GREEN), RESET_COLOR, message_f);
                 d_printer->TPRINTF(info_format, args...);
             }
         }
@@ -269,8 +279,10 @@ public:
     virtual void afterEach(TESTCASE testcase, TPRINTER *t) {};
 
     void run() {
+        setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
         std::cout << "[ now test " << SUPER::name() << " with " << d_testcases.size() << " test case(s) ]"
                   << std::endl;
+        resetColor();
         beforeAll();
 
         d_printer->increaseIndent();
@@ -287,7 +299,9 @@ public:
         d_printer->decreaseIndent();
 
         afterAll();
+        setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
         std::cout << "[ test " << SUPER::name() << " finished ]" << std::endl;
+        resetColor();
     }
 
     TPRINTER *TP() { return d_printer; }

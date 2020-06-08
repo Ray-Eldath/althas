@@ -35,12 +35,12 @@ private:
         this->reset();
     }
 
-    void onEach(AddOne_TestCase testcase, TESTING *t) override {
+    void onEach(AddOne_TestCase testcase, TPRINTER *t) override {
         this->DUT->cmd = testcase.cmd;
         this->DUT->reset = testcase.reset;
     }
 
-    void afterEach(AddOne_TestCase testcase, TESTING *t) override {
+    void afterEach(AddOne_TestCase testcase, TPRINTER *t) override {
         TASSERT_INFO(DUT->value, testcase.expected_value, "[%-8s] cmd=%-5d reset=%-5d -> %-5hu (expected: %hu)",
                      testcase.name, testcase.cmd, testcase.reset, DUT->value, testcase.expected_value);
     }
