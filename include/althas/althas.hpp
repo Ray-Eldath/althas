@@ -47,10 +47,21 @@ public:
 
     inline void decreaseIndent() { indent -= 1; };
 
+    inline void TPRINTF(const char *content) const {
+        printIndent();
+        printf("%s", content);
+    }
+
     template<class ...Args>
     inline void TPRINTF(const char *format, Args... args) const {
         printIndent();
         printf(format, args...);
+    }
+
+    inline void TPRINTFI(const char *content) {
+        increaseIndent();
+        TPRINTF(content);
+        decreaseIndent();
     }
 
     template<class ...Args>
@@ -210,11 +221,11 @@ private:
             const char *message_ff = value_f;
             if (strncmp(value_f, "%", 1) == 0) // if starts with %
                 message_ff = value_f + 1; // substring
-            char *format;
+            char format[100];
             sprintf(format,
                     "expected: %%%s actual: %%%s\n", message_ff, message_ff); // e.g. expected: %10d actual: %10d
 
-            printf(format, actual, expected);
+            printf(format, expected, actual);
         } else
             std::cout << "expected: " << std::setiosflags(std::ios::left) << std::setw(10)
                       << expected << "actual: " << actual << std::endl;

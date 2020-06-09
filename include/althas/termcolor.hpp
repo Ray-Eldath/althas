@@ -54,14 +54,21 @@ const char *color(ForegroundColor fc = ForegroundColor::UNSPECIFIED,
         return RESET_COLOR;
 
     static char code[15];
+    char buf[5];
     strcpy(code, "\033[");
 
-    if (fc != ForegroundColor::UNSPECIFIED)
-        sprintf(code, "%s;%d", code, (int) fc);
-    if (bc != BackgroundColor::UNSPECIFIED)
-        sprintf(code, "%s;%d", code, (int) bc);
-    if (e != Effect::UNSPECIFIED)
-        sprintf(code, "%s;%d", code, (int) e);
+    if (fc != ForegroundColor::UNSPECIFIED) {
+        sprintf(buf, "%d", (int) fc);
+        strcat(strcat(code, ";"), buf);
+    }
+    if (bc != BackgroundColor::UNSPECIFIED) {
+        sprintf(buf, "%d", (int) bc);
+        strcat(strcat(code, ";"), buf);
+    }
+    if (e != Effect::UNSPECIFIED) {
+        sprintf(buf, "%d", (int) e);
+        strcat(strcat(code, ";"), buf);
+    }
 
     strcat(code, "m");
     return code;
