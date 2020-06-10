@@ -90,4 +90,12 @@ const char *colorize(const char *text,
     return buf;
 }
 
+inline const char *lrpad(const char *text) {
+    static char buf[50];
+    strcpy(buf, " ");
+    strcat(buf, text);
+    strcat(buf, " ");
+    return buf;
+}
+
 #endif //ALTHAS_TERMCOLOR_HPP

@@ -8,10 +8,11 @@
 int main() {
     setColor(ForegroundColor::BLUE);
     printf("blue\n");
-    printf("blue\n");
 
+    printf("%s\n", colorize(lrpad("blue"), ForegroundColor::BLACK, BackgroundColor::BLUE));
+    printf("%s\n", colorize(lrpad("yellow"), ForegroundColor::BLACK, BackgroundColor::YELLOW));
     setColor(ForegroundColor::BLACK, BackgroundColor::RED, Effect::UNDERLINE);
-    printf(" blue black underline");
+    printf(" blue black underline ");
     resetColor();
     printf("\n");
 
