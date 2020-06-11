@@ -126,15 +126,21 @@ public:
 
     virtual void tick() {
         d_tickcount++;
+#ifdef CLOCK_LINE_ENABLED
         DUT->CLOCK_WIRE = 0;
+#endif
         eval();
         if (d_trace) d_trace->dump(10 * d_tickcount - 2);
 
+#ifdef CLOCK_LINE_ENABLED
         DUT->CLOCK_WIRE = 1;
+#endif
         eval();
         if (d_trace) d_trace->dump(10 * d_tickcount);
 
+#ifdef CLOCK_LINE_ENABLED
         DUT->CLOCK_WIRE = 0;
+#endif
         eval();
         if (d_trace) {
             d_trace->dump(10 * d_tickcount + 5);
@@ -168,7 +174,6 @@ class TESTER : protected TESTBENCH<DEVICE> {
 private:
     typedef TESTBENCH<DEVICE> SUPER;
     const std::string d_vcdname;
-    TPRINTER *d_printer;
 
     template<bool VALUE_FORMAT_ENABLED = false, class VALUE, class ...Args>
     void TASSERT_(const char *value_f, VALUE actual, VALUE expected, const char *message_f, Args &... args) {
@@ -233,6 +238,7 @@ private:
 
 protected:
     const std::vector<TESTCASE> d_testcases;
+    TPRINTER *d_printer;
 public:
     template<class VALUE, class ...Args>
     inline void TASSERT_INFO(VALUE actual, VALUE expected, const char *message_f, Args &... args) {
@@ -294,22 +300,22 @@ public:
         std::cout << "[ now test " << SUPER::name() << " with " << d_testcases.size() << " test case(s) ]"
                   << std::endl;
         resetColor();
-        beforeAll();
 
         d_printer->increaseIndent();
         this->start_trace(d_vcdname.c_str());
 
+        beforeAll();
         for (auto testcase: d_testcases) {
             beforeEach(testcase, d_printer);
             onEach(testcase, d_printer);
             this->tick();
             afterEach(testcase, d_printer);
         }
+        afterAll();
 
         this->stop_trace();
         d_printer->decreaseIndent();
 
-        afterAll();
         setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
         std::cout << "[ test " << SUPER::name() << " finished ]" << std::endl;
         resetColor();
