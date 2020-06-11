@@ -285,9 +285,13 @@ public:
 
     ~TESTER() { delete d_printer; }
 
+    virtual void beforeTraceStarts() {};
+
     virtual void beforeAll() {};
 
     virtual void afterAll() {};
+
+    virtual void afterTraceEnds() {};
 
     virtual void beforeEach(TESTCASE testcase, TPRINTER *t) {};
 
@@ -300,6 +304,7 @@ public:
         std::cout << "[ now test " << SUPER::name() << " with " << d_testcases.size() << " test case(s) ]"
                   << std::endl;
         resetColor();
+        beforeTraceStarts();
 
         d_printer->increaseIndent();
         this->start_trace(d_vcdname.c_str());
@@ -315,6 +320,8 @@ public:
 
         this->stop_trace();
         d_printer->decreaseIndent();
+
+        afterTraceEnds();
 
         setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
         std::cout << "[ test " << SUPER::name() << " finished ]" << std::endl;
