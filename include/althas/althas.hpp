@@ -127,23 +127,23 @@ public:
     virtual void tick() {
         d_tickcount++;
 #ifdef CLOCK_LINE_ENABLED
-        DUT->CLOCK_WIRE = 0;
+        DUT->CLOCK_WIRE = 1;
 #endif
         eval();
-        if (d_trace) d_trace->dump(10 * d_tickcount - 2);
+        if (d_trace) d_trace->dump(10 * d_tickcount - 5);
 
 #ifdef CLOCK_LINE_ENABLED
-        DUT->CLOCK_WIRE = 1;
+        DUT->CLOCK_WIRE = 0;
 #endif
         eval();
         if (d_trace) d_trace->dump(10 * d_tickcount);
 
 #ifdef CLOCK_LINE_ENABLED
-        DUT->CLOCK_WIRE = 0;
+        DUT->CLOCK_WIRE = 1;
 #endif
         eval();
         if (d_trace) {
-            d_trace->dump(10 * d_tickcount + 5);
+//            d_trace->dump(10 * d_tickcount + 5);
             d_trace->flush();
         }
     }
@@ -285,13 +285,13 @@ public:
 
     ~TESTER() { delete d_printer; }
 
-    virtual void beforeTraceStarts() {};
+    virtual void beforeStart() {};
 
     virtual void beforeAll() {};
 
     virtual void afterAll() {};
 
-    virtual void afterTraceEnds() {};
+    virtual void afterEnd() {};
 
     virtual void beforeEach(TESTCASE testcase, TPRINTER *t) {};
 
@@ -301,10 +301,9 @@ public:
 
     void run() {
         setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
-        std::cout << "[ now test " << SUPER::name() << " with " << d_testcases.size() << " test case(s) ]"
-                  << std::endl;
+        std::cout << "[ now test " << SUPER::name() << " with " << d_testcases.size() << " test case(s) ]" << std::endl;
         resetColor();
-        beforeTraceStarts();
+        beforeStart();
 
         d_printer->increaseIndent();
         this->start_trace(d_vcdname.c_str());
@@ -321,7 +320,7 @@ public:
         this->stop_trace();
         d_printer->decreaseIndent();
 
-        afterTraceEnds();
+        afterEnd();
 
         setColor(ForegroundColor::UNSPECIFIED, BackgroundColor::UNSPECIFIED, Effect::BOLD);
         std::cout << "[ test " << SUPER::name() << " finished ]" << std::endl;
